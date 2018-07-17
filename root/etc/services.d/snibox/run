@@ -1,0 +1,10 @@
+#!/usr/bin/with-contenv bash
+
+cd /app/snibox || exit
+
+RAILS_ENV=production
+
+nginx
+
+exec \
+	s6-setuidgid abc /usr/local/ruby/bin/ruby ./bin/rails s
