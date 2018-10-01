@@ -1,0 +1,35 @@
+---
+
+# project information
+project_name: snibox
+project_url: "https://snibox.github.io/"
+# project_logo: "https://camo.githubusercontent.com/e0694ef783e3fd1d74e6776b28822ced01c7cc17/687474703a2f2f6f73732e6f6574696b65722e63682f736d6f6b6570696e672f696e632f736d6f6b6570696e672d6c6f676f2e706e67"
+project_blurb: "[{{ project_name|capitalize }}]({{ project_url }}) is a self-hosted snippet manager. Developed to collect and organize code snippets."
+project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project_name }}"
+
+# supported architectures
+available_architectures:
+  - { arch: "{{ arch_x86_64 }}", tag: "tbc"}
+  - { arch: "{{ arch_arm64 }}", tag: "tbc"}
+  - { arch: "{{ arch_armhf }}", tag: "tbc"}
+
+# container parameters
+common_param_env_vars_enabled: true #PGID, PUID, etc
+param_container_name: "{{ project_name }}"
+param_usage_include_vols: true
+param_volumes:
+  - { vol_path: "/config", vol_host_path: "</path/to/{{ project_name }}/config>", desc: "Persistent config files" }
+param_usage_include_ports: true
+param_ports:
+  - { external_port: "80", internal_port: "80", port_desc: "Snibox Web UI" }
+param_usage_include_env: true
+param_env_vars:
+  - { env_var: "DB_PASS", env_value: "", desc: "Database password"}
+
+# application setup block
+app_setup_block_enabled: true
+app_setup_block: |
+  - Once running the URL will be `http://<host-ip>/`.
+
+# changelog
+changelogs:
