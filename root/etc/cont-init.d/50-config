@@ -1,17 +1,18 @@
 #!/usr/bin/with-contenv bash
 
-DB_NAME=${DB_NAME:-snibox}
-DB_USER=${DB_USER:-postgres}
-DB_PASS=${DB_PASS:-}
-DB_HOST=${DB_HOST:-postgres}
-DB_PORT=${DB_PORT:-5432}
-MAILGUN_SMTP_PORT=${MAILGUN_SMTP_PORT:-587}
-MAILGUN_SMTP_SERVER=${MAILGUN_SMTP_SERVER:-smtp.mailgun.org}
-MAILGUN_SMTP_LOGIN=${MAILGUN_SMTP_LOGIN:-}
-MAILGUN_SMTP_PASSWORD=${MAILGUN_SMTP_PASSWORD:-}
-MAILGUN_API_KEY=${MAILGUN_API_KEY:-}
-MAILGUN_DOMAIN=${MAILGUN_DOMAIN:-}
-MAILGUN_PUBLIC_KEY=${MAILGUN_PUBLIC_KEY:-}
+declare -A SNIBOX_CONF
+SNIBOX_CONF[DB_NAME]=${DB_NAME:-snibox}
+SNIBOX_CONF[DB_USER]=${DB_USER:-postgres}
+SNIBOX_CONF[DB_PASS]=${DB_PASS:-}
+SNIBOX_CONF[DB_HOST]=${DB_HOST:-postgres}
+SNIBOX_CONF[DB_PORT]=${DB_PORT:-5432}
+SNIBOX_CONF[MAILGUN_SMTP_PORT]=${MAILGUN_SMTP_PORT:-587}
+SNIBOX_CONF[MAILGUN_SMTP_SERVER]=${MAILGUN_SMTP_SERVER:-smtp.mailgun.org}
+SNIBOX_CONF[MAILGUN_SMTP_LOGIN]=${MAILGUN_SMTP_LOGIN:-}
+SNIBOX_CONF[MAILGUN_SMTP_PASSWORD]=${MAILGUN_SMTP_PASSWORD:-}
+SNIBOX_CONF[MAILGUN_API_KEY]=${MAILGUN_API_KEY:-}
+SNIBOX_CONF[MAILGUN_DOMAIN]=${MAILGUN_DOMAIN:-}
+SNIBOX_CONF[MAILGUN_PUBLIC_KEY]=${MAILGUN_PUBLIC_KEY:-}
 
 # persist env variables
 if [ ! -f "/config/.env" ]; then
@@ -19,18 +20,13 @@ if [ ! -f "/config/.env" ]; then
 	SECRET=$(cd /app/snibox && /usr/local/ruby/bin/ruby /app/snibox/bin/rake secret)
 
 	sed -i 's|paste_your_key|'$SECRET'|g' /config/.env
-	sed -i 's|DB_NAME=postgres|DB_NAME='$DB_NAME'|g' /config/.env
-	sed -i 's|DB_USER=postgres|DB_USER='$DB_USER'|g' /config/.env
-	sed -i 's|DB_PASS=|DB_PASS='$DB_PASS'|g' /config/.env
-	sed -i 's|DB_HOST=database|DB_HOST='$DB_HOST'|g' /config/.env
-	sed -i 's|DB_PORT=5432|DB_PORT='$DB_PORT'|g' /config/.env
-	sed -i 's|MAILGUN_SMTP_PORT=587|MAILGUN_SMTP_PORT='$MAILGUN_SMTP_PORT'|g' /config/.env
-	sed -i 's|MAILGUN_SMTP_SERVER=smtp.mailgun.org|MAILGUN_SMTP_SERVER='$MAILGUN_SMTP_SERVER'|g' /config/.env
-	sed -i 's|MAILGUN_SMTP_LOGIN=|MAILGUN_SMTP_LOGIN='$MAILGUN_SMTP_LOGIN'|g' /config/.env
-	sed -i 's|MAILGUN_SMTP_PASSWORD=|MAILGUN_SMTP_PASSWORD='$MAILGUN_SMTP_PASSWORD'|g' /config/.env
-	sed -i 's|MAILGUN_API_KEY=|MAILGUN_API_KEY='$MAILGUN_API_KEY'|g' /config/.env
-	sed -i 's|MAILGUN_DOMAIN=|MAILGUN_DOMAIN='$MAILGUN_DOMAIN'|g' /config/.env
-	sed -i 's|MAILGUN_PUBLIC_KEY=|MAILGUN_PUBLIC_KEY='$MAILGUN_PUBLIC_KEY'|g' /config/.env
+
+	for KEY in "${!SNIBOX_CONF[@]}"; do \
+	if [[ ${SNIBOX_CONF[$KEY]} == "" ]]; then \
+	:
+	else sed -i 's|'$KEY'=.*$|'$KEY'='${SNIBOX_CONF[$KEY]}'|g' /config/.env
+	fi
+	done
 fi
 
 if [ ! -f "/app/snibox/.env" ]; then
